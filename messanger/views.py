@@ -1,22 +1,24 @@
 import json
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+
+from django.http import HttpResponse
+
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 
 # Create your views here.
 def hello(request):
     return HttpResponse("Hello, world. You're at the messanger index.")
 
-def request(request):
-    if request.method == 'POST':
-        try:
-            request_json = json.loads(request.body)
-            name = employee['name']
-            role = employee['role']
-            salary = employee['salary']
 
-            response_data = {'status': 'success'}
-            return JsonResponse(response_data)
-        except json.JSONDecodeError:
-            return HttpResponseBadRequest('Invalid Json')
-    else:
-        return HttpResponseBadRequest('Unsupported Method')
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def example_view(request, format=None):
+    content = {
+        'user': str(request.user),  # `django.contrib.auth.User` instance.
+        'auth': str(request.auth),  # None
+    }
+    return Response(content)
