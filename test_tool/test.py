@@ -1,12 +1,18 @@
-import requests
+import json
 
-# api-endpoint
-URL = "http://127.0.0.1:8000/messanger/hello"
 
-# sending get request and saving the response as response object
-r = requests.get(url = URL)
- 
-# extracting data in json format
-#data = r.json()
+a = {
+    'username': 'test_username_1',
+    'message': ['Hello World 1']
+}
 
-print(r.content)
+b = {
+    'username': 'test_username_2',
+    'message': ['Hello World 2']
+}
+mes1 = {0: a}
+mes2 = {1: b}
+mes1.update(mes2)
+
+asString = json.dumps(mes1)
+print(asString)
