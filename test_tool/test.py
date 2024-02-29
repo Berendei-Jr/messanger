@@ -1,18 +1,22 @@
-import json
+import requests
 
+url = 'http://127.0.0.1:8000/api/v1/message'
+url_reg = 'http://127.0.0.1:8000/api/v1/register'
 
-a = {
-    'username': 'test_username_1',
-    'message': ['Hello World 1']
+headers = {'Authorization': 'Token fe23efe82be7a554d6ff4be55f3bfc5be414fcba'}
+payload = {
+    "author": "aboba",
+    "target": "chat1",
+    "message_text": "Hello World",
+    "is_group_message": False
 }
 
-b = {
-    'username': 'test_username_2',
-    'message': ['Hello World 2']
+payload_reg = {
+    "username": "aboba",
+    "password": "1234",
+    "is_superuser": True,
 }
-mes1 = {0: a}
-mes2 = {1: b}
-mes1.update(mes2)
 
-asString = json.dumps(mes1)
-print(asString)
+response = requests.post(url, json=payload, headers=headers)
+
+print(response.text)
