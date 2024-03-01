@@ -16,7 +16,7 @@ class Chat(models.Model):
 class UserInChat(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    last_messages_update = models.DateTimeField(auto_now=True)
+    last_messages_update = models.DateTimeField(default=datetime.now)
     join_date = models.DateTimeField()
 
     def __str__(self):

@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -63,18 +64,16 @@ def register(request, format=None):
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_messages(request, format=None):
-    dummy_message_1 = {
-        'username': 'test_username_1',
-        'message': ['Hello World 1'],
-        'timestamp': time.strftime("%H:%M:%S", time.localtime())
-    }
-    dummy_message_2 = {
-        'username': 'test_username_2',
-        'message': ['Hello World 2'],
-        'timestamp': time.strftime("%H:%M:%S", time.localtime())
-    }
-    mes1 = {0: dummy_message_1}
-    mes2 = {1: dummy_message_2}
-    mes1.update(mes2)
+    user_in_chat = UserInChat.objects.filter(user=request.user).first()
+    chat_target = user_in_chat.chat
+    last_update_time = user_in_chat.last_messages_update
 
-    return Response(mes1)
+    new_messages_query = Message.objects.filter(target=chat_target, timestamp__gt=last_update_time)
+
+    if not new_messages_query.exists():
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    new_messages = list(new_messages_query.values())
+    json_response = {index: message for index, message in enumerate(new_messages)}
+    UserInChat.objects.filter(user=request.user).update(last_messages_update=datetime.now())
+    return Response(json_response, status=status.HTTP_200_OK)
