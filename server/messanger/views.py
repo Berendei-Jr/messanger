@@ -76,17 +76,24 @@ def register(request, format=None):
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_messages(request, format=None):
-    user_in_chat = UserInChat.objects.filter(user=request.user).first()
-    chat_target = user_in_chat.chat
-    last_update_time = user_in_chat.last_messages_update
+    json_response = {}
+    index = 0
+    for user_in_chat in UserInChat.objects.filter(user=request.user):
+        chat_target = user_in_chat.chat
+        last_update_time = user_in_chat.last_messages_update
 
-    new_messages_query = Message.objects.filter(target=chat_target, timestamp__gt=last_update_time)
+        new_messages_query = Message.objects.filter(target=chat_target, timestamp__gt=last_update_time)
 
-    if not new_messages_query.exists():
+        if not new_messages_query.exists():
+            continue
+
+        new_messages = list(new_messages_query.values())
+        for message in new_messages:
+            json_response[index] = message
+            index += 1
+
+    if not json_response:
         return Response({}, status=status.HTTP_204_NO_CONTENT)
-
-    new_messages = list(new_messages_query.values())
-    json_response = {index: message for index, message in enumerate(new_messages)}
     UserInChat.objects.filter(user=request.user).update(last_messages_update=datetime.now())
     return Response(json_response, status=status.HTTP_200_OK)
 

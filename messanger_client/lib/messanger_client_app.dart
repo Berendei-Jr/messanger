@@ -1,16 +1,27 @@
-import 'package:crypto_monitor/router/router.dart';
-import 'package:crypto_monitor/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:messanger_client/router/router.dart';
+import 'package:messanger_client/theme/theme.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
-class MessangerClientApp extends StatelessWidget {
+class MessangerClientApp extends StatefulWidget {
   const MessangerClientApp({super.key});
 
   @override
+  State<MessangerClientApp> createState() => _MessangerClientAppState();
+}
+
+class _MessangerClientAppState extends State<MessangerClientApp> {
+  final _appRouter = AppRouter();
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Crypto',
       theme: darkTheme,
-      routes: routes,
+      routerConfig: _appRouter.config(
+        navigatorObservers: () => [TalkerRouteObserver(GetIt.I<Talker>())],
+      ),
     );
   }
 }

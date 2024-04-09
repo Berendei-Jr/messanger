@@ -1,9 +1,9 @@
 part of 'chats_list_bloc.dart';
 
-abstract class CryptoListEvent extends Equatable {}
+abstract class ChatsListEvent extends Equatable {}
 
-class LoadCryptoList extends CryptoListEvent {
-  LoadCryptoList({this.completer});
+class LoadChatsList extends ChatsListEvent {
+  LoadChatsList({this.completer});
 
   final Completer? completer;
 

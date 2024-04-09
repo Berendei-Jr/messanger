@@ -2,26 +2,26 @@ part of 'chats_list_bloc.dart';
 
 abstract class ChatsListState extends Equatable {}
 
-class CryptoListInitial extends ChatsListState {
+class ChatsListInitial extends ChatsListState {
   @override
   List<Object?> get props => [];
 }
 
-class CryptoListLoading extends ChatsListState {
+class ChatsListLoading extends ChatsListState {
   @override
   List<Object?> get props => [];
 }
 
-class CryptoListLoaded extends ChatsListState {
-  CryptoListLoaded({required this.cryptoCoinsList});
-  final List<CryptoCoin> cryptoCoinsList;
+class ChatsListLoaded extends ChatsListState {
+  ChatsListLoaded({required this.chatsList});
+  final List<Chat> chatsList;
 
   @override
-  List<Object?> get props => [cryptoCoinsList];
+  List<Object?> get props => [chatsList];
 }
 
-class CryptoListLoadingFailure extends ChatsListState {
-  CryptoListLoadingFailure({required this.exception});
+class ChatsListLoadingFailure extends ChatsListState {
+  ChatsListLoadingFailure({required this.exception});
   final Object? exception;
 
   @override
