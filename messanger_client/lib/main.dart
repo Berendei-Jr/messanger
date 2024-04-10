@@ -9,7 +9,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:messanger_client/messanger_client_app.dart';
 import 'package:messanger_client/repositories/chat/models/models.dart';
 import 'package:messanger_client/repositories/message/models/message_model.dart';
+import 'package:messanger_client/repositories/user/abstarct_user_repository.dart';
 import 'package:messanger_client/repositories/user/models/models.dart';
+import 'package:messanger_client/repositories/user/user_repository.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -19,6 +21,7 @@ import 'repositories/chat/chats_repository.dart';
 
 // ignore: constant_identifier_names
 const ChatsBoxName = 'chats_box';
+const UserBoxName = 'user_box';
 
 void main() async {
   final talker = TalkerFlutter.init();
@@ -27,11 +30,15 @@ void main() async {
 
   await Hive.initFlutter();
   Hive.registerAdapter(UserAdapter());
+  Hive.registerAdapter(MeAdapter());
   Hive.registerAdapter(ChatAdapter());
   Hive.registerAdapter(MessageAdapter());
 
   final chatsBox = await Hive.openBox<Chat>(ChatsBoxName);
   chatsBox.clear();
+
+  final userBox = await Hive.openBox<Me>(UserBoxName);
+  userBox.clear();
 
   final dio = Dio();
   dio.interceptors.add(
@@ -51,6 +58,10 @@ void main() async {
     ),
   );
 
+  GetIt.I.registerSingleton<AbstractUserRepository>(
+    UserRepository(userBox: userBox),
+  );
+
   GetIt.I.registerLazySingleton<AbstractChatsRepository>(
     () => ChatsRepository(
       dio: dio,
@@ -58,12 +69,6 @@ void main() async {
       chatsBox: chatsBox,
     ),
   );
-
-  GetIt.I.registerSingleton<Me>(const Me(
-    name: 'andrey',
-    id: 0,
-    authToken: '2d55778c072dff49782445f16dfa7ce548c0d4e7',
-  ));
 
   FlutterError.onError =
       (details) => GetIt.I<Talker>().handle(details.exception, details.stack);

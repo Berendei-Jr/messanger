@@ -6,7 +6,7 @@ import 'package:messanger_client/repositories/user/user.dart';
 
 part 'chat_model.g.dart';
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 3)
 class Chat extends Equatable {
   @HiveField(0)
   final int id;

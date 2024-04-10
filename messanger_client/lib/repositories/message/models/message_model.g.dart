@@ -8,7 +8,7 @@ part of 'message_model.dart';
 
 class MessageAdapter extends TypeAdapter<Message> {
   @override
-  final int typeId = 1;
+  final int typeId = 2;
 
   @override
   Message read(BinaryReader reader) {

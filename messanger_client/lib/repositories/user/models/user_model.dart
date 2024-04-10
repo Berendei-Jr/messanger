@@ -23,7 +23,9 @@ class User extends Equatable {
       ];
 }
 
+@HiveType(typeId: 1)
 class Me extends User {
+  @HiveField(2)
   final String authToken;
 
   const Me({

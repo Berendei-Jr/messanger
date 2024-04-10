@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'message_model.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 2)
 @JsonSerializable()
 class Message extends Equatable {
   @JsonKey(name: 'author_id', fromJson: _getAuthorName)

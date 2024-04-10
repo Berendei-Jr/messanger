@@ -94,7 +94,7 @@ def get_messages(request, format=None):
 
     if not json_response:
         return Response({}, status=status.HTTP_204_NO_CONTENT)
-    UserInChat.objects.filter(user=request.user).update(last_messages_update=datetime.now())
+    #UserInChat.objects.filter(user=request.user).update(last_messages_update=datetime.now())
     return Response(json_response, status=status.HTTP_200_OK)
 
 

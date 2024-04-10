@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:messanger_client/repositories/chat/abstract_chats_repository.dart';
 import 'package:messanger_client/repositories/chat/models/models.dart';
 import 'package:messanger_client/repositories/message/models/models.dart';
+import 'package:messanger_client/repositories/user/abstarct_user_repository.dart';
 import 'package:messanger_client/repositories/user/user.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -14,12 +15,11 @@ class ChatsRepository implements AbstractChatsRepository {
   final Box<Chat> chatsBox;
   final String serverUrl;
   final Dio dio;
-  final String authToken = "Token ${GetIt.I<Me>().authToken}";
 
   @override
   Future<Chat> sendMessage(Message message, String chatName) async {
     try {
-      dio.options.headers['Authorization'] = authToken;
+      dio.options.headers['Authorization'] = await _getTokenHeader();
 
       final response = await dio.post(
         '$serverUrl/message',
@@ -61,7 +61,7 @@ class ChatsRepository implements AbstractChatsRepository {
 
   Future<void> _fetchMessagesFromServer() async {
     try {
-      dio.options.headers['Authorization'] = authToken;
+      dio.options.headers['Authorization'] = await _getTokenHeader();
 
       final response = await dio.post(
         '$serverUrl/get_messages',
@@ -127,6 +127,11 @@ class ChatsRepository implements AbstractChatsRepository {
       GetIt.I<Talker>().handle(e);
       rethrow;
     }
+  }
+
+  Future<String> _getTokenHeader() async {
+    String token = GetIt.I<AbstractUserRepository>().getMe().authToken;
+    return 'Token $token';
   }
 }
 
