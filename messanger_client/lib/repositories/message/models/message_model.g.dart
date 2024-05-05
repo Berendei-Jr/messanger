@@ -17,8 +17,8 @@ class MessageAdapter extends TypeAdapter<Message> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Message(
-      author: fields[0] as String,
-      target: fields[1] as String,
+      authorId: fields[0] as int,
+      targetId: fields[1] as int,
       isBroadcast: fields[2] as bool,
       message: fields[3] as String,
       timestamp: fields[4] as DateTime,
@@ -30,9 +30,9 @@ class MessageAdapter extends TypeAdapter<Message> {
     writer
       ..writeByte(5)
       ..writeByte(0)
-      ..write(obj.author)
+      ..write(obj.authorId)
       ..writeByte(1)
-      ..write(obj.target)
+      ..write(obj.targetId)
       ..writeByte(2)
       ..write(obj.isBroadcast)
       ..writeByte(3)
@@ -57,16 +57,16 @@ class MessageAdapter extends TypeAdapter<Message> {
 // **************************************************************************
 
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(
-      author: Message._getAuthorName(json['author_id'] as int),
-      target: Message._getTargetName(json['target_id'] as int),
+      authorId: json['author_id'] as int,
+      targetId: json['chat_id'] as int,
       isBroadcast: json['is_group_message'] as bool,
       message: json['message_text'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
-      'author_id': instance.author,
-      'target_id': instance.target,
+      'author_id': instance.authorId,
+      'chat_id': instance.targetId,
       'is_group_message': instance.isBroadcast,
       'message_text': instance.message,
       'timestamp': instance.timestamp.toIso8601String(),

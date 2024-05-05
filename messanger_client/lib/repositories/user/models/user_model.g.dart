@@ -82,3 +82,17 @@ class MeAdapter extends TypeAdapter<Me> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+User _$UserFromJson(Map<String, dynamic> json) => User(
+      name: json['username'] as String,
+      id: json['id'] as int,
+    );
+
+Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
+      'username': instance.name,
+      'id': instance.id,
+    };

@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:messanger_client/features/chat/widgets/chat_bubble.dart';
 import 'package:messanger_client/repositories/message/models/models.dart';
 import 'package:messanger_client/repositories/user/abstarct_user_repository.dart';
-import 'package:messanger_client/repositories/user/models/models.dart';
 
 class MessageWidget extends StatelessWidget {
   const MessageWidget({
@@ -16,17 +15,19 @@ class MessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allignment =
-        message.author == GetIt.I<AbstractUserRepository>().getMe().name
-            ? Alignment.centerRight
-            : Alignment.centerLeft;
+    final myMessage =
+        message.authorId == GetIt.I<AbstractUserRepository>().getMe().id;
+    final allignment = myMessage ? Alignment.centerRight : Alignment.centerLeft;
+    final authorName = myMessage
+        ? 'You'
+        : GetIt.I<AbstractUserRepository>().getUser(message.authorId)!.name;
 
     return Container(
         alignment: allignment,
         padding: const EdgeInsets.all(12),
         child: Column(children: [
           Text(
-            message.author,
+            authorName,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           ChatBubble(

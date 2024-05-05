@@ -14,16 +14,14 @@ class LoadChat extends ChatEvent {
 
 class SendMessage extends ChatEvent {
   SendMessage(
-      {required this.target,
+      {required this.targetId,
       required this.message,
-      required this.chatName,
       required this.isBroadcast});
 
-  final String target;
+  final int targetId;
   final String message;
-  final String chatName;
   final bool isBroadcast;
 
   @override
-  List<Object?> get props => [message, target, chatName, isBroadcast];
+  List<Object?> get props => [message, targetId, isBroadcast];
 }

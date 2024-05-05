@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:messanger_client/repositories/chat/abstract_chats_repository.dart';
 import 'package:messanger_client/repositories/chat/models/models.dart';
+import 'package:messanger_client/repositories/message/abstarct_message_repository.dart';
 import 'package:messanger_client/repositories/message/models/models.dart';
 import 'package:messanger_client/repositories/user/abstarct_user_repository.dart';
 import 'package:messanger_client/repositories/user/user.dart';
@@ -17,15 +18,15 @@ class ChatsRepository implements AbstractChatsRepository {
   final Dio dio;
 
   @override
-  Future<Chat> sendMessage(Message message, String chatName) async {
+  Future<void> sendMessage(Message message, int chatId) async {
     try {
-      dio.options.headers['Authorization'] = await _getTokenHeader();
+      dio.options.headers['Authorization'] = await getTokenHeader();
 
       final response = await dio.post(
         '$serverUrl/message',
         data: {
-          'author': message.author,
-          'target': message.target,
+          'author_id': GetIt.I<AbstractUserRepository>().getMe().id,
+          'target_id': message.targetId,
           'is_group_message': message.isBroadcast,
           'message_text': message.message,
         },
@@ -35,13 +36,7 @@ class ChatsRepository implements AbstractChatsRepository {
         throw Exception('Server error code: ${response.statusCode}');
       }
 
-      for (var chat in chatsBox.values.toList()) {
-        if (chat.name == chatName) {
-          chat.messages.add(message);
-          return chat;
-        }
-      }
-      throw Exception('Chat not found');
+      GetIt.I<AbstractMessageRepository>().addMessage(message);
     } catch (e) {
       GetIt.I<Talker>().handle(e);
       rethrow;
@@ -56,12 +51,57 @@ class ChatsRepository implements AbstractChatsRepository {
       GetIt.I<Talker>().handle(e);
     }
 
+    for (var chat in chatsBox.values.toList()) {
+      if (!chat.isGroup) {
+        User? user =
+            GetIt.I.get<AbstractUserRepository>().getUser(chat.users.first.id);
+
+        user ??= await GetIt.I<AbstractUserRepository>()
+            .requestUserInfo(chat.users.first.id);
+      }
+    }
+
     return chatsBox.values.toList();
+  }
+
+  @override
+  Future<Chat> createChat(User user) async {
+    try {
+      dio.options.headers['Authorization'] = await getTokenHeader();
+
+      final response = await dio.post(
+        '$serverUrl/create_chat',
+        data: {'target_user_id': user.id},
+      );
+
+      if (response.statusCode != 201) {
+        throw Exception(
+            'Server error ${response.statusCode}: ${response.data}');
+      }
+
+      final data = response.data as Map<String, dynamic>;
+      final chatId = data['chat_id'] as int;
+      final chat = Chat(
+        id: chatId,
+        name: user.name,
+        isGroup: false,
+        users: [user],
+      );
+      chatsBox.put(
+        chatId,
+        chat,
+      );
+
+      return chat;
+    } catch (e) {
+      GetIt.I<Talker>().handle(e);
+      rethrow;
+    }
   }
 
   Future<void> _fetchMessagesFromServer() async {
     try {
-      dio.options.headers['Authorization'] = await _getTokenHeader();
+      dio.options.headers['Authorization'] = await getTokenHeader();
 
       final response = await dio.post(
         '$serverUrl/get_messages',
@@ -86,41 +126,18 @@ class ChatsRepository implements AbstractChatsRepository {
         return details;
       }).toList();
 
-      var parsedMessages = [];
       for (var message in newMessagesList) {
-        for (var chat in chatsBox.values.toList()) {
-          if (chat.name == message.author &&
-              chat.isGroup == message.isBroadcast) {
-            chat.messages.add(message);
-            parsedMessages.add(message);
+        GetIt.I<AbstractMessageRepository>().addMessage(message);
+        var chatRecognized = false;
+
+        for (final chat in chatsBox.values.toList()) {
+          if (chat.id == message.targetId) {
+            chatRecognized = true;
+            break;
           }
         }
-      }
-
-      for (var message in newMessagesList) {
-        if (parsedMessages.contains(message)) {
-          continue;
-        }
-        final chat = Chat(
-            id: chatsBox.values.length + 1,
-            name: message.author,
-            messages: [message],
-            isGroup: message.isBroadcast,
-            users: [User(name: message.author, id: int.parse(message.author))]);
-        chatsBox.add(chat);
-        parsedMessages.add(message);
-      }
-
-      for (var message in newMessagesList) {
-        if (parsedMessages.contains(message)) {
-          continue;
-        }
-        for (var chat in chatsBox.values.toList()) {
-          if (chat.name == message.author &&
-              chat.isGroup == message.isBroadcast) {
-            chat.messages.add(message);
-            parsedMessages.add(message);
-          }
+        if (!chatRecognized) {
+          chatsBox.add(await _getChatInfo(message));
         }
       }
     } catch (e) {
@@ -129,9 +146,71 @@ class ChatsRepository implements AbstractChatsRepository {
     }
   }
 
-  Future<String> _getTokenHeader() async {
+  @override
+  Future<String> getTokenHeader() async {
     String token = GetIt.I<AbstractUserRepository>().getMe().authToken;
     return 'Token $token';
+  }
+
+  Future<Chat> _getChatInfo(Message msg) async {
+    final isGroup = msg.isBroadcast;
+
+    if (!isGroup) {
+      final myMessage =
+          msg.authorId == GetIt.I<AbstractUserRepository>().getMe().id;
+
+      if (!myMessage) {
+        User? user =
+            GetIt.I.get<AbstractUserRepository>().getUser(msg.authorId);
+
+        user ??= await GetIt.I<AbstractUserRepository>()
+            .requestUserInfo(msg.authorId);
+
+        return Chat(
+          id: msg.targetId,
+          name: user.name,
+          isGroup: isGroup,
+          users: [user],
+        );
+      } else {
+        dio.options.headers['Authorization'] = await getTokenHeader();
+
+        final response = await dio.post(
+          '$serverUrl/request_chat_info',
+          data: {
+            'chat_id': msg.targetId,
+            'is_group': msg.isBroadcast,
+          },
+        );
+
+        var chatName = '';
+        final data = response.data as Map<String, dynamic>;
+        final users = data['users'] as List<dynamic>;
+        for (var u in users) {
+          final userMap = u as Map<String, dynamic>;
+          if (userMap['id'] != GetIt.I<AbstractUserRepository>().getMe().id) {
+            chatName = userMap['username'];
+            final User user = User(
+              id: userMap['user_id'],
+              name: chatName,
+            );
+            return Chat(
+              id: msg.targetId,
+              name: chatName,
+              isGroup: isGroup,
+              users: [user],
+            );
+          }
+        }
+      }
+    }
+
+    return Chat(
+      id: msg.targetId,
+      name: '',
+      isGroup: isGroup,
+      users: [],
+    );
   }
 }
 

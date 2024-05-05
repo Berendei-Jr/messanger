@@ -1,9 +1,9 @@
 import requests
 
 url = 'http://192.168.1.73:8000/api/v1/get_messages'
-url_reg = 'http://127.0.0.1:8000/api/v1/register'
+url_reg = 'http://192.168.1.73:8000/api/v1/get_users_list'
 
-headers = {'Authorization': 'Token 2d55778c072dff49782445f16dfa7ce548c0d4e7'}
+headers = {'Authorization': 'Token 2327c1ec5059acd3dece14e3b7e02c416211227b'}
 payload = {
     "author": "andrey",
     "target": "hellcat",
@@ -12,10 +12,14 @@ payload = {
 }
 
 payload_reg = {
-    "username": "aboba",
+    "chat_id": 16,
+    "is_group": False,
 }
 
-response = requests.post(url, json={}, headers=headers)
+response = requests.post(url_reg, json={}, headers=headers)
 
 print(response.text)
 print(response.status_code)
+
+#print(datetime.datetime.now())
+

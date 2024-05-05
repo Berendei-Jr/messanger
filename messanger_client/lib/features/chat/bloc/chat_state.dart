@@ -13,11 +13,20 @@ class ChatLoading extends ChatState {
 }
 
 class ChatLoaded extends ChatState {
-  ChatLoaded({required this.chat});
+  ChatLoaded(this.messages, {required this.chat});
   final Chat chat;
+  final List<Message> messages;
 
   @override
-  List<Object?> get props => [chat];
+  List<Object?> get props => [chat, messages];
+}
+
+class ChatUpdated extends ChatState {
+  ChatUpdated({required this.messages});
+  final List<Message> messages;
+
+  @override
+  List<Object?> get props => [messages];
 }
 
 class ChatLoadingFailure extends ChatState {

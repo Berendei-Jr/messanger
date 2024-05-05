@@ -7,11 +7,8 @@ urlpatterns = [
     path('register', views.register),
     path('get_messages', views.get_messages),
     path('get_chats', views.get_chats),
+    path('request_user_info', views.request_user_info),
+    path('request_chat_info', views.request_chat_info),
+    path('get_users_list', views.get_users_list),
+    path('create_chat', views.create_chat),
 ]
-
-''''{
-    "author": "aboba",
-    "target": "chat1",
-    "message_text": "Hello World",
-    "is_group_message": false
-}'''

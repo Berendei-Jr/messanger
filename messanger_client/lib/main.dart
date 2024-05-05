@@ -8,6 +8,8 @@ import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:messanger_client/messanger_client_app.dart';
 import 'package:messanger_client/repositories/chat/models/models.dart';
+import 'package:messanger_client/repositories/message/abstarct_message_repository.dart';
+import 'package:messanger_client/repositories/message/message_repository.dart';
 import 'package:messanger_client/repositories/message/models/message_model.dart';
 import 'package:messanger_client/repositories/user/abstarct_user_repository.dart';
 import 'package:messanger_client/repositories/user/models/models.dart';
@@ -19,9 +21,11 @@ import 'package:talker_flutter/talker_flutter.dart';
 import 'repositories/chat/abstract_chats_repository.dart';
 import 'repositories/chat/chats_repository.dart';
 
-// ignore: constant_identifier_names
 const ChatsBoxName = 'chats_box';
+const MessagesBoxName = 'messages_box';
 const UserBoxName = 'user_box';
+const UsersBoxName = 'users_box';
+const ServerUrl = 'http://192.168.1.73:8000/api/v1';
 
 void main() async {
   final talker = TalkerFlutter.init();
@@ -34,18 +38,21 @@ void main() async {
   Hive.registerAdapter(ChatAdapter());
   Hive.registerAdapter(MessageAdapter());
 
-  final chatsBox = await Hive.openBox<Chat>(ChatsBoxName);
-  chatsBox.clear();
-
   final userBox = await Hive.openBox<Me>(UserBoxName);
   userBox.clear();
+  final usersBox = await Hive.openBox<User>(UsersBoxName);
+  usersBox.clear();
+  final chatsBox = await Hive.openBox<Chat>(ChatsBoxName);
+  chatsBox.clear();
+  final messagesBox = await Hive.openBox<Message>(MessagesBoxName);
+  messagesBox.clear();
 
   final dio = Dio();
   dio.interceptors.add(
     TalkerDioLogger(
       talker: talker,
       settings: const TalkerDioLoggerSettings(
-        printResponseData: false,
+        printResponseData: true,
       ),
     ),
   );
@@ -59,26 +66,26 @@ void main() async {
   );
 
   GetIt.I.registerSingleton<AbstractUserRepository>(
-    UserRepository(userBox: userBox),
+    UserRepository(
+        dio: dio, serverUrl: ServerUrl, userBox: userBox, usersBox: usersBox),
   );
 
   GetIt.I.registerLazySingleton<AbstractChatsRepository>(
     () => ChatsRepository(
       dio: dio,
-      serverUrl: 'http://192.168.1.73:8000/api/v1',
+      serverUrl: ServerUrl,
       chatsBox: chatsBox,
+    ),
+  );
+
+  GetIt.I.registerLazySingleton<AbstractMessageRepository>(
+    () => MessageRepository(
+      messagesBox: messagesBox,
     ),
   );
 
   FlutterError.onError =
       (details) => GetIt.I<Talker>().handle(details.exception, details.stack);
 
-  runZonedGuarded(() => runApp(const MessangerClientApp()), (e, st) async {
-    /*WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );*/
-
-    GetIt.I<Talker>().handle(e, st);
-  });
+  runApp(const MessangerClientApp());
 }

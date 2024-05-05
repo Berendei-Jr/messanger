@@ -1,13 +1,17 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'user_model.g.dart';
 
+@JsonSerializable()
 @HiveType(typeId: 0)
 class User extends Equatable {
+  @JsonKey(name: 'username')
   @HiveField(0)
   final String name;
 
+  @JsonKey(name: 'id')
   @HiveField(1)
   final int id;
 
@@ -15,6 +19,8 @@ class User extends Equatable {
     required this.name,
     required this.id,
   });
+
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   @override
   List<Object?> get props => [

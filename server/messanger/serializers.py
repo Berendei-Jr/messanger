@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['author', 'target', 'is_group_message', 'message_text']
+        fields = ['author', 'chat', 'is_group_message', 'message_text']
 
 
 class ChatSerializer(serializers.ModelSerializer):

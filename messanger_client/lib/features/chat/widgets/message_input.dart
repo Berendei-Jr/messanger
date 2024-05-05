@@ -46,8 +46,7 @@ class _MessageInputState extends State<MessageInput> {
               onPressed: () {
                 widget.bloc.add(SendMessage(
                   message: textController.text,
-                  target: widget.chat.getChatName(),
-                  chatName: widget.chat.name,
+                  targetId: widget.chat.id,
                   isBroadcast: widget.chat.isGroup,
                 ));
                 textController.clear();

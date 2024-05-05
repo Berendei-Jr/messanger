@@ -20,15 +20,11 @@ class Chat extends Equatable {
   @HiveField(3)
   final List<User> users;
 
-  @HiveField(4)
-  final List<Message> messages;
-
   const Chat({
     required this.id,
     required this.name,
     required this.isGroup,
     required this.users,
-    required this.messages,
   });
 
   String getChatName() {
@@ -48,5 +44,5 @@ class Chat extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, isGroup, users, messages];
+  List<Object?> get props => [id, name, isGroup, users];
 }

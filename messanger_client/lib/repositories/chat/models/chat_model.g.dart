@@ -21,14 +21,13 @@ class ChatAdapter extends TypeAdapter<Chat> {
       name: fields[1] as String,
       isGroup: fields[2] as bool,
       users: (fields[3] as List).cast<User>(),
-      messages: (fields[4] as List).cast<Message>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Chat obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -36,9 +35,7 @@ class ChatAdapter extends TypeAdapter<Chat> {
       ..writeByte(2)
       ..write(obj.isGroup)
       ..writeByte(3)
-      ..write(obj.users)
-      ..writeByte(4)
-      ..write(obj.messages);
+      ..write(obj.users);
   }
 
   @override

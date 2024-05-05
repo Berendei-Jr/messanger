@@ -7,6 +7,7 @@ import 'package:get_it/get_it.dart';
 import 'package:messanger_client/features/chats_list/bloc/chats_list_bloc.dart';
 import 'package:messanger_client/features/chats_list/widgets/widgets.dart';
 import 'package:messanger_client/repositories/chat/abstract_chats_repository.dart';
+import 'package:messanger_client/router/router.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 @RoutePage()
@@ -32,6 +33,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chats'),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             onPressed: () {
@@ -108,7 +110,9 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
         iconSize: 40,
         tooltip: 'Create new chat',
         icon: const Icon(Icons.message),
-        onPressed: () {},
+        onPressed: () {
+          AutoRouter.of(context).push(const UsersListRoute());
+        },
       ),
     );
   }

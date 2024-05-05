@@ -1,19 +1,21 @@
 import 'package:equatable/equatable.dart';
+import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:messanger_client/repositories/user/abstarct_user_repository.dart';
 
 part 'message_model.g.dart';
 
 @HiveType(typeId: 2)
 @JsonSerializable()
 class Message extends Equatable {
-  @JsonKey(name: 'author_id', fromJson: _getAuthorName)
+  @JsonKey(name: 'author_id')
   @HiveField(0)
-  final String author;
+  final int authorId;
 
-  @JsonKey(name: 'target_id', fromJson: _getTargetName)
+  @JsonKey(name: 'chat_id')
   @HiveField(1)
-  final String target;
+  final int targetId;
 
   @JsonKey(name: 'is_group_message')
   @HiveField(2)
@@ -28,8 +30,8 @@ class Message extends Equatable {
   final DateTime timestamp;
 
   const Message({
-    required this.author,
-    required this.target,
+    required this.authorId,
+    required this.targetId,
     required this.isBroadcast,
     required this.message,
     required this.timestamp,
@@ -38,14 +40,6 @@ class Message extends Equatable {
   factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(json);
 
-  static String _getAuthorName(int id) {
-    return id.toString();
-  }
-
-  static String _getTargetName(int id) {
-    return id.toString();
-  }
-
   @override
-  List<Object?> get props => [author, target, isBroadcast, timestamp];
+  List<Object?> get props => [authorId, targetId, isBroadcast, timestamp];
 }
